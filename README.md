@@ -1,4 +1,5 @@
 Customer Churn Prediction Pipeline
+
 An end-to-end Machine Learning pipeline designed to predict customer churn and extract actionable business insights. This project processes raw customer data, trains multiple classification models, handles severe class imbalance, and optimizes decision thresholds to maximize business retention efforts.
 
 📌 Business Problem
