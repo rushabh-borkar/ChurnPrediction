@@ -46,5 +46,5 @@ def predict(customer: CustomerData):
     return {
         "churn_probability": round(float(prob), 4),
         "churn_prediction": prediction,
-        "threshold_used": threshold,
+        "threshold_used": round(float(threshold), 4),   # <-- cast this too
     }
