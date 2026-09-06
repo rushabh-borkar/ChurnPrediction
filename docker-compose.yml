@@ -1,0 +1,14 @@
+services:
+  fastapi:
+    build: .
+    container_name: churn-fastapi
+    ports:
+      - "8000:8000"
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
+
+  streamlit:
+    build: .
+    container_name: churn-streamlit
+    ports:
+      - "8501:8501"
+    command: streamlit run app.py --server.address=0.0.0.0 --server.port=8501
