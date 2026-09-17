@@ -1,98 +1,84 @@
 # Telco Customer Churn Prediction
 
-A machine learning project that predicts customer churn risk for a telecom company, comparing classical ML and deep learning approaches, and deployed as both a REST API and an interactive web app.
+A machine learning project that predicts customer churn risk for a telecom company by comparing classical machine learning and deep learning approaches, with the final model deployed through a REST API and interactive web application.
 
 ## Overview
 
-This project uses the [Telco Customer Churn dataset](https://www.kaggle.com/datasets/blastchar/telco-customer-churn) to predict whether a customer is likely to churn, based on their account details, services subscribed, and billing information.
+This project uses the [Telco Customer Churn dataset](https://www.kaggle.com/datasets/blastchar/telco-customer-churn) to predict whether a customer is likely to churn based on their account information, subscribed services, contract details, and billing information.
 
-## Models Compared
+The project covers the complete machine learning workflow:
 
-Three models were trained and evaluated, with thresholds tuned to optimize F1 score:
+- Data cleaning and preprocessing
+- Exploratory data analysis
+- Model training
+- Hyperparameter tuning
+- Deep learning model comparison
+- Model evaluation
+- Classification threshold optimization
+- Model serialization
+- REST API deployment
+- Interactive web application
+- Containerized deployment with Docker
 
-| Model | Accuracy | Precision | Recall | F1 Score | ROC AUC | Best Threshold |
-|---|---|---|---|---|---|---|
-| Tuned Logistic Regression | 0.7608 | 0.5359 | 0.7380 | 0.6209 | 0.8402 | 0.5684 |
-| **Tuned XGBoost (deployed)** | **0.7828** | **0.5711** | 0.7299 | **0.6408** | **0.8456** | 0.3400 |
-| Tuned MLP (PyTorch, Deep Learning) | 0.7679 | 0.5475 | 0.7246 | 0.6237 | 0.8331 | 0.2777 |
+## Machine Learning Workflow
 
-**XGBoost was selected as the final deployed model**, outperforming both Logistic Regression and a PyTorch feedforward neural network across every metric. This is consistent with well-documented findings that gradient boosting methods tend to outperform deep learning on small-to-medium tabular datasets — deep learning's advantages typically emerge with much larger datasets or unstructured data (images, text).
+```text
+Dataset
+   ↓
+Data Cleaning & Preprocessing
+   ↓
+Train/Test Split
+   ↓
+Feature Transformation
+   ↓
+Baseline Models
+   ├── Logistic Regression
+   └── Decision Tree
+   ↓
+XGBoost
+   ↓
+Hyperparameter Tuning
+   ↓
+PyTorch MLP Comparison
+   ↓
+Model Evaluation
+   ↓
+F1-Based Threshold Optimization
+   ↓
+Final XGBoost Pipeline
+   ↓
+FastAPI + Streamlit
+   ↓
+Docker Compose
 
-## Tech Stack
+##Models Compared
 
-- **Modeling**: scikit-learn, XGBoost, PyTorch
-- **API**: FastAPI
-- **UI**: Streamlit
-- **Deployment**: Docker, Docker Compose
+Three tuned models were evaluated using the same test set. Classification thresholds were optimized using the precision-recall curve to maximize F1 score.
 
-## Project Structure
+Model	Accuracy	Precision	Recall	F1 Score	ROC AUC	Best Threshold
+Tuned Logistic Regression	0.7608	0.5359	0.7380	0.6209	0.8402	0.5684
+Tuned XGBoost (Deployed)	0.7828	0.5711	0.7299	0.6408	0.8456	0.3400
+Tuned MLP      (PyTorch)	0.7679	0.5475	0.7246	0.6237	0.8331	0.2777
 
-```
-├── app.py                        # Streamlit UI
-├── main.py                       # FastAPI backend
-├── code.ipynb                    # Model training, evaluation, and comparison
-├── churn_model_pipeline.pkl      # Final trained XGBoost pipeline
-├── churn_model_threshold.pkl     # Optimal decision threshold (F1-tuned)
-├── requirements.txt
-├── Dockerfile
-├── docker-compose.yml
-└── README.md
-```
+XGBoost was selected for deployment based on the evaluation results, including the highest F1 score and ROC AUC among the evaluated models. Logistic Regression achieved slightly higher recall, while the MLP provided an additional deep learning comparison on the tabular dataset.
 
-## Running Locally with Docker
+##Threshold Optimization
 
-```bash
-docker-compose up --build
-```
+Instead of using the default classification threshold of 0.5, the decision threshold was tuned using the precision-recall curve.
+For the deployed XGBoost model:
+Optimized F1 threshold: 0.34
+This threshold is stored separately and used by the API during prediction.
+The purpose of threshold optimization is to control the precision-recall trade-off according to the project's evaluation objective rather than relying on the default probability cutoff.
 
-- FastAPI: [http://localhost:8000/docs](http://localhost:8000/docs) — interactive Swagger UI for the `/predict` endpoint
-- Streamlit: [http://localhost:8501](http://localhost:8501) — interactive form-based UI
+##Model Evaluation
 
-## API Example
-
-**POST** `/predict`
-
-```json
-{
-  "gender": "Female",
-  "SeniorCitizen": 0,
-  "Partner": "No",
-  "Dependents": "No",
-  "tenure": 2,
-  "PhoneService": "Yes",
-  "MultipleLines": "No",
-  "InternetService": "Fiber optic",
-  "OnlineSecurity": "No",
-  "OnlineBackup": "No",
-  "DeviceProtection": "No",
-  "TechSupport": "No",
-  "StreamingTV": "No",
-  "StreamingMovies": "No",
-  "Contract": "Month-to-month",
-  "PaperlessBilling": "Yes",
-  "PaymentMethod": "Electronic check",
-  "MonthlyCharges": 85.0,
-  "TotalCharges": 170.0
-}
-```
-
-**Response:**
-```json
-{
-  "churn_probability": 0.6899,
-  "churn_prediction": 1,
-  "threshold_used": 0.34
-}
-```
-
-## Key Learnings
-
-- Tuning the decision threshold (rather than defaulting to 0.5) meaningfully improves F1 score on imbalanced classification tasks like churn prediction.
-- Gradient boosting (XGBoost) outperformed a PyTorch neural network on this tabular dataset, reinforcing that deep learning isn't always the right tool — model choice should be driven by data characteristics, not by trend.
-- Deployed the same model behind two interfaces (REST API + interactive UI) using Docker Compose, reflecting a realistic multi-service architecture.
-
-## Future Improvements
-
-- Refactor Streamlit to call the FastAPI backend instead of loading the model independently (cleaner single-source-of-truth architecture)
-- Add experiment tracking (MLflow / Weights & Biases)
-- Add CI/CD via GitHub Actions
+The models were evaluated using:
+Accuracy
+Precision
+Recall
+F1 Score
+ROC AUC
+Confusion Matrix
+ROC Curve
+Precision-Recall Curve
+Threshold vs F1 Curve
