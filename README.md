@@ -1,17 +1,26 @@
 # Telco Customer Churn Prediction
 
-A machine learning project that predicts customer churn risk for a telecom company by comparing classical machine learning and deep learning approaches, with the final model deployed through a REST API and interactive web application.
+A machine learning project that predicts customer churn risk for a telecom company by comparing classical machine learning and deep learning approaches. The final model is served through a REST API and an interactive web application, both containerized with Docker Compose.
+
+## Demo
+
+**Streamlit Application**
+
+<img width="1917" height="987" alt="Streamlit churn prediction interface" src="https://github.com/user-attachments/assets/8e842752-d403-4fd3-b3b6-9ea771a2caeb" />
+
+**FastAPI Swagger UI**
+
+<img width="1907" height="988" alt="FastAPI Swagger UI" src="https://github.com/user-attachments/assets/4b35b36b-c089-4388-ab06-4dd6705578f7" />
 
 ## Overview
 
-This project uses the [Telco Customer Churn dataset](https://www.kaggle.com/datasets/blastchar/telco-customer-churn) to predict whether a customer is likely to churn based on their account information, subscribed services, contract details, and billing information.
+This project uses the [Telco Customer Churn dataset](https://www.kaggle.com/datasets/blastchar/telco-customer-churn) to predict whether a customer is likely to churn, based on account information, subscribed services, contract details and billing information.
 
-The project covers the complete machine learning workflow:
+It covers the complete machine learning workflow:
 
 - Data cleaning and preprocessing
 - Exploratory data analysis
-- Model training
-- Hyperparameter tuning
+- Model training and hyperparameter tuning
 - Deep learning model comparison
 - Model evaluation
 - Classification threshold optimization
@@ -22,7 +31,7 @@ The project covers the complete machine learning workflow:
 
 ## Machine Learning Workflow
 
-```text
+```
 Dataset
    ↓
 Data Cleaning & Preprocessing
@@ -50,111 +59,106 @@ Final XGBoost Pipeline
 FastAPI + Streamlit
    ↓
 Docker Compose
+```
 
-##Models Compared
+## Models Compared
 
-Three tuned models were evaluated using the same test set. Classification thresholds were optimized using the precision-recall curve to maximize F1 score.
+Three tuned models were evaluated on the same test set. Classification thresholds were optimized using the precision-recall curve to maximize F1 score.
 
-Model	Accuracy	Precision	Recall	F1 Score	ROC AUC	Best Threshold
-Tuned Logistic Regression	0.7608	0.5359	0.7380	0.6209	0.8402	0.5684
-Tuned XGBoost (Deployed)	0.7828	0.5711	0.7299	0.6408	0.8456	0.3400
-Tuned MLP      (PyTorch)	0.7679	0.5475	0.7246	0.6237	0.8331	0.2777
+| Model | Accuracy | Precision | Recall | F1 Score | ROC AUC | Best Threshold |
+| --- | --- | --- | --- | --- | --- | --- |
+| Tuned Logistic Regression | 0.7608 | 0.5359 | 0.7380 | 0.6209 | 0.8402 | 0.5684 |
+| **Tuned XGBoost (Deployed)** | **0.7828** | **0.5711** | 0.7299 | **0.6408** | **0.8456** | 0.3400 |
+| Tuned MLP (PyTorch) | 0.7679 | 0.5475 | 0.7246 | 0.6237 | 0.8331 | 0.2777 |
 
-XGBoost was selected for deployment based on the evaluation results, including the highest F1 score and ROC AUC among the evaluated models. Logistic Regression achieved slightly higher recall, while the MLP provided an additional deep learning comparison on the tabular dataset.
+XGBoost was selected for deployment because it had the highest F1 score and ROC AUC of the three models. Logistic Regression achieved slightly higher recall, and the MLP provided an additional deep learning comparison on a tabular dataset.
 
-##Threshold Optimization
+## Threshold Optimization
 
-Instead of using the default classification threshold of 0.5, the decision threshold was tuned using the precision-recall curve.
-For the deployed XGBoost model:
-Optimized F1 threshold: 0.34
-This threshold is stored separately and used by the API during prediction.
-The purpose of threshold optimization is to control the precision-recall trade-off according to the project's evaluation objective rather than relying on the default probability cutoff.
+Instead of the default classification threshold of 0.5, the decision threshold was tuned using the precision-recall curve.
 
-##Model Evaluation
+For the deployed XGBoost model, the optimized F1 threshold is **0.34**. It is stored separately (`churn_model_threshold.pkl`) and used by the API at prediction time.
+
+Threshold optimization lets the project control the precision-recall trade-off according to its evaluation objective, rather than relying on the default probability cutoff.
+
+## Model Evaluation
 
 The models were evaluated using:
-Accuracy
-Precision
-Recall
-F1 Score
-ROC AUC
-Confusion Matrix
-ROC Curve
-Precision-Recall Curve
-Threshold vs F1 Curve
 
-#Deployment Architecture
-                 ┌──────────────────┐
-                 │    Streamlit     │
-                 │   Web Interface  │
-                 └────────┬─────────┘
-                          │
-                          │ HTTP POST
-                          ▼
-                 ┌──────────────────┐
-                 │     FastAPI      │
-                 │    REST API      │
-                 └────────┬─────────┘
-                          │
-                          ▼
-              ┌───────────────────────┐
-              │    XGBoost Pipeline   │
-              │   + F1 Threshold 0.34 │
-              └───────────────────────┘
-The Streamlit application communicates with the FastAPI backend rather than loading the model independently. This keeps model inference centralized in the API service.
+- Accuracy, Precision, Recall, F1 Score, ROC AUC
+- Confusion Matrix
+- ROC Curve
+- Precision-Recall Curve
+- Threshold vs F1 Curve
 
-Streamlit Application
-<img width="1917" height="987" alt="image" src="https://github.com/user-attachments/assets/8e842752-d403-4fd3-b3b6-9ea771a2caeb" />
+## Deployment Architecture
 
-FastAPI Swagger UI
-<img width="1907" height="988" alt="image" src="https://github.com/user-attachments/assets/4b35b36b-c089-4388-ab06-4dd6705578f7" />
+```
+        ┌──────────────────┐
+        │    Streamlit     │
+        │   Web Interface  │
+        └────────┬─────────┘
+                 │ HTTP POST
+                 ▼
+        ┌──────────────────┐
+        │     FastAPI      │
+        │    REST API      │
+        └────────┬─────────┘
+                 │
+                 ▼
+     ┌───────────────────────┐
+     │    XGBoost Pipeline   │
+     │  + F1 Threshold 0.34  │
+     └───────────────────────┘
+```
 
-#Tech Stack
-##Machine Learning
-Python
-Pandas
-NumPy
-Scikit-learn
-XGBoost
-PyTorch
-##Backend
-FastAPI
-Pydantic
-Uvicorn
-##Frontend
-Streamlit
-##Deployment
-Docker
-Docker Compose
+The Streamlit application communicates with the FastAPI backend rather than loading the model itself. This keeps model inference centralized in the API service.
 
-#Project Structure
-├── app.py                        # Streamlit UI
-├── main.py                       # FastAPI backend
-├── code.ipynb                    # Model training and evaluation
-├── churn_model_pipeline.pkl     # Trained XGBoost pipeline
-├── churn_model_threshold.pkl    # F1-optimized classification threshold
+## Tech Stack
+
+| Area | Tools |
+| --- | --- |
+| Machine Learning | Python, Pandas, NumPy, Scikit-learn, XGBoost, PyTorch |
+| Backend | FastAPI, Pydantic, Uvicorn |
+| Frontend | Streamlit |
+| Deployment | Docker, Docker Compose |
+
+## Project Structure
+
+```
+├── app.py                      # Streamlit UI
+├── main.py                     # FastAPI backend
+├── code.ipynb                  # Model training and tuning
+├── Model Evaluation.ipynb      # Model evaluation and comparison
+├── churn_model_pipeline.pkl    # Trained XGBoost pipeline
+├── churn_model_threshold.pkl   # F1-optimized classification threshold
 ├── requirements.txt
 ├── Dockerfile
 ├── docker-compose.yml
+├── .dockerignore
 └── README.md
+```
 
-#Running with Docker
+## Running with Docker
+
 Make sure Docker Desktop is running, then execute:
+
+```bash
 docker compose up --build
-##FastAPI
-Open:
-http://localhost:8000/docs
-This provides the interactive Swagger UI for the API.
-##Streamlit
-Open:
-http://localhost:8501
-This provides the interactive customer churn prediction interface.
+```
 
-##API
-POST /predict
-The API accepts customer information and returns the predicted churn probability, binary prediction, and threshold used for classification.
+- **FastAPI (Swagger UI):** http://localhost:8000/docs
+- **Streamlit app:** http://localhost:8501
 
-##Example Request:
+## API
+
+### `POST /predict`
+
+Accepts customer information and returns the predicted churn probability, the binary prediction and the threshold used for classification.
+
+**Example request**
+
+```json
 {
   "gender": "Female",
   "SeniorCitizen": 0,
@@ -176,27 +180,32 @@ The API accepts customer information and returns the predicted churn probability
   "MonthlyCharges": 85.0,
   "TotalCharges": 170.0
 }
-##Example Response:
+```
+
+**Example response**
+
+```json
 {
   "churn_probability": 0.6899,
   "churn_prediction": 1,
   "threshold_used": 0.34
 }
-#Key Learnings
-1.Classification threshold selection can significantly affect precision, recall, and F1 score.
-2.Model evaluation should consider multiple metrics rather than accuracy alone, particularly for churn classification.
-3.XGBoost, Logistic Regression, and a PyTorch MLP were evaluated on the same problem to compare different modeling approaches.
-4.A trained ML model can be integrated into a production-style inference service using FastAPI.
-5.Separating the frontend from the inference API provides a cleaner application architecture.
-6.Docker Compose can be used to run the frontend and backend as separate services.
+```
 
-#Future Improvements
-Add experiment tracking using MLflow or Weights & Biases
-Add automated testing for the API and prediction pipeline
-Add CI/CD using GitHub Actions
-Add model monitoring and data-drift detection
-Deploy the application to a cloud platform
-Add authentication and API rate limiting
+## Key Learnings
 
-#License
-**One important thing:** don't paste the `screenshots/...` section unless you're actually going to add those three image files. Otherwise GitHub will show broken images.
+1. Classification threshold selection can significantly affect precision, recall and F1 score.
+2. Model evaluation should consider multiple metrics rather than accuracy alone, particularly for churn classification.
+3. XGBoost, Logistic Regression and a PyTorch MLP were evaluated on the same problem to compare different modeling approaches.
+4. A trained ML model can be integrated into a production-style inference service using FastAPI.
+5. Separating the frontend from the inference API gives a cleaner application architecture.
+6. Docker Compose can run the frontend and backend as separate services.
+
+## Future Improvements
+
+- Add experiment tracking with MLflow or Weights & Biases
+- Add automated tests for the API and prediction pipeline
+- Add CI/CD using GitHub Actions
+- Add model monitoring and data-drift detection
+- Deploy the application to a cloud platform
+- Add authentication and API rate limiting
